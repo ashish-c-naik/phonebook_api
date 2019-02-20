@@ -22,7 +22,8 @@
     "elasticsearch": "^15.4.1",
     "express": "^4.16.4",
     "install": "^0.12.2",
-    "mongoose": "^5.4.14"
+    "mongoose": "^5.4.14",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",

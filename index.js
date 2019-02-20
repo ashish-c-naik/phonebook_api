@@ -30,7 +30,7 @@ app.get('/contact', function (req, res) {
 app.get('/contact/:param', function (req, res) {
     elastic.client_search(req.params.param)
         .then(results => {
-            res.send({ "results": results.hits.hits });
+            res.send({ "results": results });
         })
         .catch(err => {
             res.send([{ "error": "No such contact found" }]);

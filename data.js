@@ -1,6 +1,7 @@
 const elasticsearch = require('elasticsearch');
 var contact_model = require('./models/contact')
 var uuid = require('./models/uuid')
+var request = require('request')
 
 // instantiate an Elasticsearch client
 const client = new elasticsearch.Client({
@@ -80,28 +81,29 @@ var client_insert = function (name, telephone, email, uuid = null) {
     }
 }
 
-// TODO:
-// Update functionality
-// Unable to handle updates
-var client_update = function (uuid, name, telephone, email) {
-    var params = {}
-    var source = "ctx._source.name=uuid;"
-    if (name !== '') { params["name"] = name; source += "ctx._source.name=name;" }
-    if (telephone !== '') { params["telephone"] = name; source += "ctx._source.telephone=telephone;" }
-    if (email !== '') { params["email"] = name; source += "ctx._source.email=email;" }
-
-    var body = {
-        "script": {
-            "source": source,
-            "lang": "painless",
-            "params": params
-        }
+// Used curl operation
+var client_update = async function (uuid, name, telephone, email) {
+    var _id = ''
+    await client_search(uuid)
+        .then(result => {
+            _id = result.hits.hits[0]._id
+        })
+    if (telephone === '' || email === '' || name === '' || _id === '') {
+        return false
     }
-    return client.update({
-        index: 'eai_api',
-        type: 'contact',
-        body: body
-    })
+    // Used the http-request to perform a curl operation
+    request({
+        uri: "http://localhost:9200/eai_api/contact/" + _id + "/_update",
+        method: "POST",
+        json: {
+            "doc": {
+                name: name,
+                telephone: telephone,
+                email: email
+            }
+        }
+    });
+    return true
 }
 
 // Deletes the contact with the provided uuid

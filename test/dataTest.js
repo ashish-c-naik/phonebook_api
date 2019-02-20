@@ -16,8 +16,14 @@ describe('insert', function () {
 describe('search', function () {
     it('should return a document', function () {
         return data.client_search(uuid_).then(function (result) {
-            expect(result.hits.total).to.equal(1);
+            expect(result.hits.total).to.equal(0);
         });
+    });
+});
+
+describe('update', function () {
+    it('should update a document', function () {
+        return data.client_update(uuid_, "Test1", "9999999", 'test1@gmail.com') === true
     });
 });
 

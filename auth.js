@@ -42,13 +42,12 @@ router.put('/contact/:param', (req, res) => {
     var telephone = req.query['telephone'] === null ? '' : req.query['telephone']
     var email = req.query['email'] === null ? '' : req.query['email']
 
-    elastic.client_update(uuid, name, telephone, email)
-        .then(results => {
-            res.send({ "results": results.hits.hits });
-        })
-        .catch(err => {
-            res.send([{ "error": "Unable to update." }]);
-        });
+    var result = elastic.client_update(uuid, name, telephone, email)
+    if (result) {
+        res.send([{ "success": "Updated!" }])
+    } else {
+        res.send([{ "error": "Unable to update" }])
+    }
 })
 
 // Usually contains the authentication flag along with router information
