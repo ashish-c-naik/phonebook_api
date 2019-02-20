@@ -12,7 +12,7 @@ const client = new elasticsearch.Client({
 
 // Searches all the documents with the input parameters
 var client_search_all = function (pageSize, page, query) {
-    query = query === ''? {} : query
+    query = query === '' ? {} : query
     let body = {
         size: pageSize,
         from: page,
@@ -48,36 +48,35 @@ var client_search = function (uuid) {
 // With name, telephone and email information
 // Makes a recurrsive call back to itself if 
 // the uuid is already taken by some other document
-var client_index = function (name, telephone, email, uuid=null) {
+var client_insert = function (name, telephone, email, uuid = null) {
     if (uuid === null)
-    var body = contact_model(name, telephone, email) 
+        var body = contact_model(name, telephone, email)
     else
-    var body = {
-        uuid: uuid,
-        name: name,
-        telephone:telephone,
-        email:email
-    }
+        var body = {
+            uuid: uuid,
+            name: name,
+            telephone: telephone,
+            email: email
+        }
 
     if (body) {
-         client_search(body.uuid)
+        client_search(body.uuid)
             .then(results => {
                 if (results.hits.total !== 0) {
-                    return client_index(name, telephone, email)
+                    return client_insert(name, telephone, email)
                 } else {
-                    client.index({
+                    return client.index({
                         index: 'eai_api',
                         type: 'contact',
                         body: body
                     })
-                    return true
                 }
             })
             .catch(err => {
-                res.send([{"error":"Connection problem"}]);
+                res.send([{ "error": "Connection problem" }]);
             });
     } else {
-    return false
+        return false
     }
 }
 
@@ -87,15 +86,15 @@ var client_index = function (name, telephone, email, uuid=null) {
 var client_update = function (uuid, name, telephone, email) {
     var params = {}
     var source = "ctx._source.name=uuid;"
-    if (name !== ''){ params["name"] = name; source += "ctx._source.name=name;" }
-    if (telephone !== ''){ params["telephone"] = name; source += "ctx._source.telephone=telephone;" }
+    if (name !== '') { params["name"] = name; source += "ctx._source.name=name;" }
+    if (telephone !== '') { params["telephone"] = name; source += "ctx._source.telephone=telephone;" }
     if (email !== '') { params["email"] = name; source += "ctx._source.email=email;" }
 
     var body = {
-        "script" : {
+        "script": {
             "source": source,
             "lang": "painless",
-            "params" : params
+            "params": params
         }
     }
     return client.update({
@@ -114,12 +113,19 @@ var client_delete = async function (uuid) {
             }
         }
     }
-    return await client.deleteByQuery({
+    var result = await client.deleteByQuery({
         index: 'eai_api',
         type: 'contact',
         body: body
     })
+    result
+        .then(results => {
+            return true
+        })
+        .catch(err => {
+            return false
+        });
 }
 
 // export the functions 
-module.exports = { client_search, client_index, client_update ,client_delete, client_search_all }
+module.exports = { client_search, client_insert, client_update, client_delete, client_search_all }

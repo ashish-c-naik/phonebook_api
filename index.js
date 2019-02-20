@@ -13,16 +13,16 @@ app.use(bodyParser.json())
 
 // API endpoint to get the records based on the paramters
 // of pageSize, page and query
-app.get('/contact', function(req, res) {
+app.get('/contact', function (req, res) {
     var pageSize = req.query['pageSize'] == null ? 200 : req.query['pageSize']
     var page = req.query['page'] == null ? 0 : req.query['page']
     var query = req.query['query'] ? '' : req.query['query']
     elastic.client_search_all(pageSize, page, query)
         .then(results => {
-            res.send({"results":results.hits.hits});
+            res.send({ "results": results.hits.hits });
         })
         .catch(err => {
-            res.send([{"error":"No results"}]);
+            res.send([{ "error": "No results" }]);
         });
 })
 
@@ -30,10 +30,10 @@ app.get('/contact', function(req, res) {
 app.get('/contact/:param', function (req, res) {
     elastic.client_search(req.params.param)
         .then(results => {
-            res.send({"results":results.hits.hits});
+            res.send({ "results": results.hits.hits });
         })
         .catch(err => {
-            res.send([{"error":"No such contact found"}]);
+            res.send([{ "error": "No such contact found" }]);
         });
 })
 

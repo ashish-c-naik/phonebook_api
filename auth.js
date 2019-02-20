@@ -11,44 +11,43 @@ router.post('/contact', function (req, res) {
     var telephone = req.query['telephone']
     var email = req.query['email']
     var uuid = req.query['uuid']
-    var result = elastic.client_index(name, telephone, email, uuid)
+    var result = elastic.client_insert(name, telephone, email, uuid)
     if (result !== false) {
-        res.send({"success":"Created Successfully!"});
+        res.send({ "success": "Created Successfully!" });
     } else {
-        res.send([{"error": "Error in the values passed"}])
+        res.send([{ "error": "Error in the values passed" }])
     }
 })
 
 // Delete based on uuid
-// TODO: unknown error
+// TODO: always unknown error
 router.delete('/contact/:param', async function (req, res) {
     try {
-        await elastic.client_delete(req.params.param) 
-            .then(results => {
-                res.send(results.hits.hits);
-            })
-            .catch(err => {
-                res.send([{"error": "Unable to delete."}]);
-            });
+        var result = await elastic.client_delete(req.params.param)
+        if (result === true) {
+            res.send({ "success": "deleted" });
+        } else {
+            res.send({ "error": "Not found" })
+        }
     }
     catch (err) {
-        res.send([{"error": "Unknown error."}])
+        res.send([{ "error": "Unknown error." }])
     }
 })
 
 // Update based on uuid and contact information
 router.put('/contact/:param', (req, res) => {
     var uuid = req.params.param
-    var name = req.query['name'] === null? '' : req.query['name']
-    var telephone = req.query['telephone'] === null? '' : req.query['telephone']
-    var email = req.query['email'] === null? '' : req.query['email']
-    
+    var name = req.query['name'] === null ? '' : req.query['name']
+    var telephone = req.query['telephone'] === null ? '' : req.query['telephone']
+    var email = req.query['email'] === null ? '' : req.query['email']
+
     elastic.client_update(uuid, name, telephone, email)
         .then(results => {
-            res.send({"results":results.hits.hits});
+            res.send({ "results": results.hits.hits });
         })
         .catch(err => {
-            res.send([{"error": "Unable to update."}]);
+            res.send([{ "error": "Unable to update." }]);
         });
 })
 

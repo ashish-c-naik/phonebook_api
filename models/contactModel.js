@@ -5,7 +5,7 @@ let mongoose = require('mongoose')
 let contactSchema = mongoose.Schema({
     uuid: String,
     name: String,
-    telephone: String,
+    telephone: Number,
     email: String
 })
 
