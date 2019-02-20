@@ -1,31 +1,24 @@
-// Authorization is done here
-// JWT tokens can be used to authorize the query before POST request
+// Authorization can be done while POST, DELETE, PUT requests
+// Variables and imports
 var express = require('express')
 var router = express.Router()
 var contact_model = require('./models/contact')
 var elastic = require('./data')
 
-
-router.post('/contact', async function (req, res) {
+// Creates a contact with unique uuid
+router.post('/contact', function (req, res) {
     var name = req.query["name"];
     var telephone = req.query['telephone']
     var email = req.query['email']
-    console.log(typeof name, typeof telephone, typeof email)
     var result = elastic.client_index(name, telephone, email)
-    if (result) {
-        result
-            .then(results => {
-                res.send("Created Successfully!");
-            })
-            .catch(err => {
-                console.log(err)
-                res.send([]);
-            });
+    if (result !== false) {
+        res.send({"success":"Created Successfully!"});
     } else {
         res.send([{"error": "Error in the values passed"}])
     }
 })
 
+// Delete based on uuid
 router.delete('/contact/:param', async function (req, res) {
     elastic.client_delete(req.params.param)
         .then(results => {
@@ -37,17 +30,22 @@ router.delete('/contact/:param', async function (req, res) {
         });
 })
 
-
-// router.put('/contact/:param', (req, res) => {
-//     elastic.client_update(req.params.param)
-//         .then(results => {
-//             res.send(results.hits.hits);
-//         })
-//         .catch(err => {
-//             console.log(err)
-//             res.send([{"error": "Unable to update."}]);
-//         });
-// })
+// Update based on uuid and contact information
+router.put('/contact/:param', (req, res) => {
+    var uuid = req.params.param
+    var name = req.query['name'] === null? '' : req.query['name']
+    var telephone = req.query['telephone'] === null? '' : req.query['telephone']
+    var email = req.query['email'] === null? '' : req.query['email']
+    
+    elastic.client_update(uuid, name, telephone, email)
+        .then(results => {
+            res.send({"results":results.hits.hits});
+        })
+        .catch(err => {
+            console.log(err)
+            res.send([{"error": "Unable to update."}]);
+        });
+})
 
 // Usually contains the authentication flag along with router information
 var auth = { router, checkAuthenticated: true }
