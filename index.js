@@ -22,7 +22,6 @@ app.get('/contact', function(req, res) {
             res.send({"results":results.hits.hits});
         })
         .catch(err => {
-            console.log(err)
             res.send([{"error":"No results"}]);
         });
 })
@@ -34,7 +33,6 @@ app.get('/contact/:param', function (req, res) {
             res.send({"results":results.hits.hits});
         })
         .catch(err => {
-            console.log(err)
             res.send([{"error":"No such contact found"}]);
         });
 })

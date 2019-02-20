@@ -6,7 +6,9 @@ var uuid = require('./models/uuid')
 const client = new elasticsearch.Client({
     hosts: ['http://localhost:9200']
 });
-
+// client.indices.create({
+//     index: 'eai_api'
+// });
 
 // Searches all the documents with the input parameters
 var client_search_all = function (pageSize, page, query) {
@@ -46,24 +48,32 @@ var client_search = function (uuid) {
 // With name, telephone and email information
 // Makes a recurrsive call back to itself if 
 // the uuid is already taken by some other document
-var client_index = function (name, telephone, email) {
+var client_index = function (name, telephone, email, uuid=null) {
+    if (uuid === null)
     var body = contact_model(name, telephone, email) 
+    else
+    var body = {
+        uuid: uuid,
+        name: name,
+        telephone:telephone,
+        email:email
+    }
+
     if (body) {
          client_search(body.uuid)
             .then(results => {
-                console.log(results, "results", body)
                 if (results.hits.total !== 0) {
                     return client_index(name, telephone, email)
                 } else {
-                    return client.index({
+                    client.index({
                         index: 'eai_api',
                         type: 'contact',
                         body: body
                     })
+                    return true
                 }
             })
             .catch(err => {
-                console.log(err)
                 res.send([{"error":"Connection problem"}]);
             });
     } else {

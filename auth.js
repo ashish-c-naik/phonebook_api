@@ -10,7 +10,8 @@ router.post('/contact', function (req, res) {
     var name = req.query["name"];
     var telephone = req.query['telephone']
     var email = req.query['email']
-    var result = elastic.client_index(name, telephone, email)
+    var uuid = req.query['uuid']
+    var result = elastic.client_index(name, telephone, email, uuid)
     if (result !== false) {
         res.send({"success":"Created Successfully!"});
     } else {
@@ -19,15 +20,20 @@ router.post('/contact', function (req, res) {
 })
 
 // Delete based on uuid
+// TODO: unknown error
 router.delete('/contact/:param', async function (req, res) {
-    elastic.client_delete(req.params.param)
-        .then(results => {
-            res.send(results.hits.hits);
-        })
-        .catch(err => {
-            console.log(err)
-            res.send([{"error": "Unable to delete."}]);
-        });
+    try {
+        await elastic.client_delete(req.params.param) 
+            .then(results => {
+                res.send(results.hits.hits);
+            })
+            .catch(err => {
+                res.send([{"error": "Unable to delete."}]);
+            });
+    }
+    catch (err) {
+        res.send([{"error": "Unknown error."}])
+    }
 })
 
 // Update based on uuid and contact information
@@ -42,7 +48,6 @@ router.put('/contact/:param', (req, res) => {
             res.send({"results":results.hits.hits});
         })
         .catch(err => {
-            console.log(err)
             res.send([{"error": "Unable to update."}]);
         });
 })
