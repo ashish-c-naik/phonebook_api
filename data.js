@@ -7,9 +7,17 @@ var request = require('request')
 const client = new elasticsearch.Client({
     hosts: ['http://localhost:9200']
 });
-// client.indices.create({
-//     index: 'eai_api'
-// });
+
+// Create eai_api index to add documents to
+client.indices.create({
+    index: 'eai_api'
+}, function(error, response, status) {
+    if (error) {
+        console.log("The index already exists");
+    } else {
+        console.log("created a new index", response);
+    }
+});
 
 // Searches all the documents with the input parameters
 var client_search_all = function (pageSize, page, query) {
