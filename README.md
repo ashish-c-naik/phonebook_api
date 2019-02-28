@@ -1,4 +1,4 @@
-# eai_api
+# phonebook_api
 Nodejs, Express, ElasticSearch
 
 ## How to run
